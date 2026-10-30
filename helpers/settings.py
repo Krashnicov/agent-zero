@@ -826,6 +826,12 @@ def _dict_to_env(data_dict):
 def set_root_password(password: str):
     if not runtime.is_dockerized():
         raise Exception("root password can only be set in dockerized environments")
+    if os.geteuid() != 0:
+        # Non-root runtime: chpasswd cannot work here, and one failure must not
+        # abort the whole settings save (mirrors the inert boot-time chpasswd
+        # attempt in prepare.py when the process runs as a dedicated user).
+        PrintStyle().print("Skipping root password change: not running as root")
+        return
     _result = subprocess.run(
         ["chpasswd"],
         input=f"root:{password}".encode(),

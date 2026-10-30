@@ -60,6 +60,7 @@
 
 - `file_browser_max_text_size_mb` persists the instance-wide text-editing limit, default 10 MiB and normalized to 1–100. FileBrowser reads it directly so its scoped settings API can update it without restarting or reinitializing agents.
 - `file_browser_max_transfer_size_mb` independently persists the Files transfer limit, default 100 MiB, normalized to a positive integer without an upper ceiling. It does not change Backup & Restore or WebSocket limits.
+- `set_root_password` applies `chpasswd` only when the process runs as root (`euid == 0`) inside a dockerized runtime. On non-root runtimes (for example dedicated-user VM installs such as a0-val) it prints a notice and returns without error, so a settings save never fails on the root-password step. Writing the password to `.env` remains part of the dockerized path before this guard; callers must treat root-password changes as best-effort on non-root hosts.
 
 - Helper modules own reusable framework APIs and must preserve public callers unless all callers, tests, and docs are updated together.
 - Update this file whenever public functions, classes, persistence behavior, path/security assumptions, side effects, or cross-module contracts change.
